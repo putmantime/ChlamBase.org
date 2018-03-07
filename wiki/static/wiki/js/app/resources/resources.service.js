@@ -103,7 +103,6 @@ angular
 angular
     .module('resources')
     .factory('appData', function ($resource) {
-        console.log('resources appData');
         var url = '/static/wiki/json/appData.json';
         return $resource(url, {}, {
             getAppData: {
@@ -119,7 +118,6 @@ angular
     .module('resources')
     .factory('sendToView', function ($http) {
         var sendToView = function (url_suffix, data) {
-            console.log(data);
             var url = url_suffix;
             return $http.post(url, data)
                 .success(function (data) {
@@ -186,7 +184,6 @@ angular
 angular
     .module('resources')
     .factory('speciesGenes', function ($http) {
-        console.log('speciesGenes');
         var endpoint = 'https://query.wikidata.org/sparql?format=json&query=';
         var getSpeciesGenes = function (taxid) {
             var url = endpoint + encodeURIComponent("SELECT ?protein ?proteinLabel ?uniprot " +
@@ -198,7 +195,6 @@ angular
                     "FILTER (lang(?proteinLabel) = \"en\") " +
                     "}"
                 );
-            console.log(url);
             return $http.get(url)
                 .success(function (response) {
                     return response
@@ -243,7 +239,6 @@ angular
                     "?locusTag ?uniprot ?chromosome ?chromosomeLabel ?genStart ?genEnd ?strand " +
                     "?refSeqChromosome ?refSeqChromosomeLabel "
                 );
-            console.log(url);
             return $http.get(url)
                 .success(function (response) {
                     return response
@@ -409,7 +404,6 @@ angular
                     "GROUP BY ?protein ?hostGeneLabel ?proteinLabel ?reference_stated_in ?reference_stated_inLabel ?pmid ?hostProtein ?hostProteinLabel ?host ?hostLabel"
                 );
 
-            console.log(url);
             return $http.get(url).then(function (response) {
                 return response.data.results.bindings;
             });
@@ -464,7 +458,6 @@ angular
     .module('resources')
     .factory('expasyData', function ($http) {
         var expasy_endpoint = 'http://enzyme.expasy.org/EC/{ecnumber}.txt';
-
         var getReactionData = function (ecNumber) {
             var url = expasy_endpoint.replace('{ecnumber}', ecNumber);
             return $http.get(url).then(
@@ -527,9 +520,11 @@ angular
             var url = endpoint.replace('{locusTag}', val);
             return $http.get(url)
                 .success(function (response) {
+                    console.log('resource response success', response);
                     return response;
                 })
                 .error(function (response) {
+                    console.log('resource response error', response);
                     return response
                 });
         };
@@ -776,7 +771,6 @@ angular
 
             var url1 = preq.replace(/prot_qid/g, pqid).replace(/an_prop/g, pred).replace(/id_prop/g, idprop);
             var url = endpoint + encodeURIComponent(url1);
-            console.log(url1);
             return $http.get(url)
                 .success(function (response) {
                     return response;
