@@ -175,25 +175,29 @@ class FeatureDataRetrieval(object):
             tidGeneList = []
             queryObj = WDSparqlQueries(taxid=self.taxid)
             tidGenes = queryObj.genes4tid()
+
             for gene in tidGenes:
-                geneObj = {
-                    '_id': gene['uniqueID']['value'],
-                    'entrez': gene['entrezGeneID']['value'],
-                    'start': gene['start']['value'],
-                    'end': gene['end']['value'],
-                    'strand': gene['strand']['value'],
-                    'uri': gene['uri']['value'],
-                    'locusTag': gene['name']['value'],
-                    'label': gene['description']['value'],
-                    'refSeq': gene['refSeq']['value'],
-                    'taxid': self.taxid,
-                    'timestamp': strftime("%Y-%m-%d %H:%M:%S", gmtime())
-                }
-                tidGeneList.append(geneObj)
+                if 'refSeq' in gene.keys():
+                    geneObj = {
+                        '_id': gene['uniqueID']['value'],
+                        'entrez': gene['entrezGeneID']['value'],
+                        'start': gene['start']['value'],
+                        'end': gene['end']['value'],
+                        'strand': gene['strand']['value'],
+                        'uri': gene['uri']['value'],
+                        'locusTag': gene['name']['value'],
+                        'label': gene['description']['value'],
+                        'refSeq': gene['refSeq']['value'],
+                        'taxid': self.taxid,
+                        'timestamp': strftime("%Y-%m-%d %H:%M:%S", gmtime())
+                    }
+                    tidGeneList.append(geneObj)
             deletion_result = self.genes.delete_many({"taxid": self.taxid})
             result = self.genes.insert_many(tidGeneList)
+            print("replaced " + str(len(result.inserted_ids)) + " genes from taxid: " + self.taxid)
             replaceLog.append("replaced " + str(len(result.inserted_ids)) + " genes from taxid: " + self.taxid)
         except Exception as e:
+            pprint(e)
             replaceLog.append((e, self.taxid))
         return replaceLog
 
@@ -271,9 +275,10 @@ class FeatureDataRetrieval(object):
         filepath = self.dirpath + filename
         with open(filepath, 'w', newline='') as csvfile:
             featurewriter = csv.writer(csvfile, delimiter='\t')
-            # genewriter.writerow(['seqid', 'source', 'type', 'start', 'end', 'score', 'strand', 'phase', 'attributes'])
+            # featurewriter.writerow(['seqid', 'source', 'type', 'start', 'end', 'score', 'strand', 'phase', 'attributes'])
             cursor = self.genes.find({'taxid': self.taxid})
             for doc in cursor:
+
                 featurewriter.writerow(
                     [doc['refSeq'], 'NCBI Gene', 'Gene', doc['start'], doc['end'], '.', doc['strand'],
                      '.', 'id={}'.format(doc['locusTag'])])
@@ -289,3 +294,5 @@ class FeatureDataRetrieval(object):
                 featurewriter.writerow(
                     [doc['refSeq'], 'PubMed', 'Operon', doc['start'], doc['end'], '.', doc['strand'],
                      '.', 'id={}'.format(doc['label'])])
+
+
